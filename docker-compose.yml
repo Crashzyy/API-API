@@ -4,7 +4,7 @@ services:
     image: mysql:8.0
     container_name: MySQL-API
     environment:
-      MYSQL_DATABASE: API-ujikom
+      MYSQL_DATABASE: API_ujikom
       MYSQL_USER: api_ujikom
       MYSQL_PASSWORD: api_ujikom
       MYSQL_ROOT_PASSWORD: paswordroot
