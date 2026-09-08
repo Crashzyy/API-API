@@ -1,17 +1,17 @@
 services: 
   #Database
   mysql-server:
-    image: mysql:8.0
-    container_name: MySQL-API
+    image: mysql:8.0-debian
+    container_name: MySQL_Alat
     environment:
-      MYSQL_DATABASE: API_ujikom
-      MYSQL_USER: api_ujikom
-      MYSQL_PASSWORD: api_ujikom
+      MYSQL_DATABASE: Alat_api
+      MYSQL_USER: alat_api
+      MYSQL_PASSWORD: alat_api
       MYSQL_ROOT_PASSWORD: paswordroot
     ports:                                                                                                                                         
       - "3306:3306"
     networks:
-      - API-UJIKOM
+      - ALAT_API
     volumes:
       - db_data:/var/lib/mysql
 
@@ -20,7 +20,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: laravel-api
+    container_name: alat_app
     working_dir: /var/www
     ports: 
       - "8000:8000"
@@ -30,12 +30,12 @@ services:
     depends_on: 
       - mysql-server 
     networks: 
-      - API-UJIKOM
+      - ALAT_API
 
   # UI Server Database 
   phppMyadmin:
     image: phpmyadmin
-    container_name: PhpMyadmin-API
+    container_name: PhpMyadmin-alat
     environment:
       PMA_HOST: mysql-server
     ports:
@@ -43,10 +43,10 @@ services:
     depends_on:
       - mysql-server
     networks:
-      - API-UJIKOM
+      - ALAT_API
 
 volumes:
   db_data:
 networks:
-  API-UJIKOM:
+  ALAT_API:
     driver: bridge
