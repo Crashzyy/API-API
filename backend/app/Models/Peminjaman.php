@@ -22,15 +22,15 @@ class Peminjaman extends Model
         ];
     }
 
-    protected function user(): BelongsTo {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
-    protected function detailPinjam(): HasMany {
-        return $this->hasMany(DetailPinjam::class);
+    public function detailPinjams(): HasMany {
+        return $this->hasMany(DetailPinjam::class, 'peminjaman_id');
     }
 
-    protected function pengembalian(): HasOne {
+    public function pengembalian(): HasOne {
         return $this->hasOne(Pengembalian::class);
     }
 }

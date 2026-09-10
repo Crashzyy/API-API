@@ -14,17 +14,17 @@ class Alat extends Model
         'kategori_id', 'nama_alat', 'stok', 'status_kondisi', 'deskripsi', 'gambar'
     ];
 
-    protected function casts(): array {
+    public function casts(): array {
         return [
             'stok' => 'integer',
         ];
     }
 
-    protected function kategori(): BelongsTo {
+    public function kategori(): BelongsTo {
         return $this->belongTo(Kategori::class);
     }
 
-    protected function detailPinjam(): HasMany {
+    public function detailPinjam(): HasMany {
         return $this->hasMany(DetailPinjam);
     }
 }

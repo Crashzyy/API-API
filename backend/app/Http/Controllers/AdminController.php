@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alat;
-use App\models\Peminjaman;
+use App\Models\Peminjaman;
 use App\Models\DetailPinjam;
 use App\Models\Kategori;
 use App\Models\User;
@@ -106,7 +106,7 @@ class AdminController extends Controller
     $search = $request->input('search');
 
         $kategoris = Kategori::when($search, function ($query, $search) {
-            return $query->where('nama_kategori', 'like', "%($search)%");  
+            return $query->where('nama_kategori', 'like', "%{$search}%");  
         })
             ->latest()
             ->paginate(5)
@@ -136,7 +136,7 @@ class AdminController extends Controller
         //Menampilkan form edit kategori
         public function editKategori($id) {
             $kategori = Kategori::findOrFail($id);
-            return view('admin.kategori.edit', compact('kategoris'));
+            return view('admin.kategori.edit', compact('kategori'));
         }
 
         //Memperbarui kategori
@@ -159,7 +159,7 @@ class AdminController extends Controller
             $kategori = Kategori::findOrFail($id);
 
             //Opsional: Mengcheck apakah kategori masih dipakai oleh alat
-            if ($kategori->$alat()->exists()) {
+            if ($kategori->alat()->exists()) {
                 return redirect()->route('admin.kategori.index')
                 ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh data alat');
             }
@@ -177,7 +177,7 @@ class AdminController extends Controller
                 return $query->where('nama_alat', 'like', "%{$search}%")
                     ->orWhere('status_kondisi', 'like', "%{$search}%")
                     ->orWhereHas('kategori', function ($q) use ($search) {
-                        $q->where('nama_kategori', 'like', "%search%");
+                        $q->where('nama_kategori', 'like', "%{search}%");
                     });
             })
             ->latest()
@@ -222,7 +222,7 @@ class AdminController extends Controller
     public function editAlat($id) {
         $alat = Alat::findOrFail($id);
         $kategoris = Kategori::all();
-        return view('admin.alat.edit', compact('alats', 'kategori'));
+        return view('admin.alat.edit', compact('alat', 'kategori'));
     }
 
     //Memperbarui data alat
@@ -274,7 +274,7 @@ class AdminController extends Controller
 
         $search = $request->input('search');
 
-        $peminjamams = Peminjaman::with(['user', 'detailPinjams.alat'])
+        $peminjamans = Peminjaman::with(['user', 'detailPinjams.alat'])
             ->when($search, function ($query, $search) {
                 return $query->where('status', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($q) use ($search) {
@@ -285,7 +285,7 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.peminjaman.index', compact('peminjamams'));
+        return view('admin.peminjaman.index', compact('peminjamans'));
     }
 
     //Menampilkan form tambah peminjaman

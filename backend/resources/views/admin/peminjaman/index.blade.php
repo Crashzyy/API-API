@@ -32,7 +32,7 @@
                             class="ml-2 bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-2 text-sm rounded-lg flex items-center transition">
                             Reset
                         </a>
-                    endif
+                    @endif
                 </form>
 
                 <!-- Tombol Tambah -->
@@ -62,7 +62,7 @@
                             </td>
                             <td class="py-3 px-4 border-b">
                                 <ul class="list-disc list-inside space-y-1">
-                                    @foreach($peminjaman->detailPeminjams as $detail)
+                                    @foreach($peminjaman->detailPinjams as $detail)
                                         <li>
                                             <span class="font-semibold">{{ $detail->alat->nama_alat ?? 'Alat Dihapus' }}</span>
                                             <span class="text-xs bg-gray-200 px-1.5 py-0.5 rounded">({{ $detail->jumlah }} pcs)</span>

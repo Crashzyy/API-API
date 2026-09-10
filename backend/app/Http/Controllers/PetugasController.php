@@ -16,71 +16,92 @@ class PetugasController extends Controller
         return view('petugas.peminjaman.index', compact('peminjamans'));
     }
 
-    public function setujuiPeminjaman($id) {
-        DB::beginTransaction();
-        try {
-            $peminjaman = Peminjaman::with('detailPinjams')->findOrFail($id);
-            $peminjaman->update(['status' => 'dipinjam']);
+public function setujuiPeminjaman($id)
+{
+    $peminjaman = Peminjaman::with('detailPinjams.alat')
+        ->findOrFail($id);
 
-            //Memastikan stok alat cukup sebelum mengurangi stok
-            if ($alat->stok < $detail->jumlah) {
-                throw new \Exception("Stok alat {$alat->nama_alat} tidak cukup untuk peminjaman.");
-            }
-
-            //Cegah stok dikurangi dua kali
-            if ($peminjaman->status !== 'diajukan'){
-                return back()->with('error', 'Peminjaman sudah diproses.');
-            }
-
-            //kurangi stok alat secara otomatis
-            foreach ($peminjaman->detailPinjams as $detail) {
-                $alat = Alat::findOrFail($detail->alat_id);
-                $alat->stok -= $detail->jumlah;
-                $alat->save();
-            }
-
-            DB::commit();
-            return redirect()->back()->with('success', 'Peminjaman disetujui dan stok alat dikurangi.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi kesalahan' . $e->getMessage());
-        }
+    if ($peminjaman->status !== 'diajukan') {
+        return back()->with('error', 'Peminjaman sudah diproses.');
     }
-    public function prosesPengembalian (Request $request, $peminjamanId) {
-        $request->validate([
-            'kondisi_kembali' => 'required|string',
-            'denda' => 'nullable|integer', 
+
+    DB::beginTransaction();
+
+    try {
+        foreach ($peminjaman->detailPinjams as $detail) {
+            $alat = $detail->alat;
+
+            if (!$alat || $alat->stok < $detail->jumlah) {
+                throw new \Exception(
+                    "Stok alat {$alat->nama_alat} tidak mencukupi."
+                );
+            }
+
+            $alat->decrement('stok', $detail->jumlah);
+        }
+
+        $peminjaman->update([
+            'status' => 'dipinjam',
         ]);
 
-        DB::beginTransaction();
-        try {
-            $peminjaman = Peminjaman::with('detailPinjams')->findOrFail($peminjamanId);
+        DB::commit();
 
-            //simpan data pengembalian
-            Pengembalian::create([
-                'peminjaman_id' => $peminjaman->id,
-                'tgl_kembali' => now(),
-                'kondisi_kembali' => $request->kondisi_kembali,
-                'denda' => $request->denda ?? 0,
-                'petugas_id' => auth()->id(),
-            ]);
+        return back()->with(
+            'success',
+            'Peminjaman disetujui dan stok alat dikurangi.'
+        );
+    } catch (\Exception $e) {
+        DB::rollBack();
 
-            //update status peminjaman jadi selesai
-            $peminjaman->update(['status' => 'selesai']);
-
-            //kembalikan stok alat ke inventaris
-            foreach ($peminjaman->detailPinjams as $detail) {
-                $alat = Alat::findOrFail($detail->alat_id);
-                $alat->stok += $detail->jumlah;
-                $alat->save();
-
-            }
-
-            DB::commit();
-            return redirect()->back()->with('success', 'Pengembalian berhasil dicatat dan stok dipulihkanl.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi Kesalahan' . $e->getMessage());
-        }
+        return back()->with('error', $e->getMessage());
     }
+}
+public function prosesPengembalian(Request $request, $peminjamanId)
+{
+    $request->validate([
+        'kondisi_kembali' => 'required|string',
+        'denda' => 'nullable|integer|min:0',
+    ]);
+
+    $peminjaman = Peminjaman::with('detailPinjams.alat')
+        ->findOrFail($peminjamanId);
+
+    if ($peminjaman->status !== 'dipinjam') {
+        return back()->with(
+            'error',
+            'Peminjaman belum berstatus dipinjam.'
+        );
+    }
+
+    DB::beginTransaction();
+
+    try {
+        Pengembalian::create([
+            'peminjaman_id' => $peminjaman->id,
+            'tgl_kembali' => now(),
+            'kondisi_kembali' => $request->kondisi_kembali,
+            'denda' => $request->denda ?? 0,
+            'petugas_id' => auth()->id(),
+        ]);
+
+        foreach ($peminjaman->detailPinjams as $detail) {
+            $detail->alat->increment('stok', $detail->jumlah);
+        }
+
+        $peminjaman->update([
+            'status' => 'selesai',
+        ]);
+
+        DB::commit();
+
+        return back()->with(
+            'success',
+            'Pengembalian berhasil dicatat.'
+        );
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return back()->with('error', $e->getMessage());
+    }
+}
 }

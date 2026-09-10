@@ -13,17 +13,17 @@ class DetailPinjam extends Model
         'peminjaman_id', 'alat_id', 'jumlah'
     ];
 
-    protected function casts(): array {
+    public function casts(): array {
         return [
             'jumlah' => 'integer',
         ];
     }
 
-    protected function peminjaman(): BelongsTo {
+    public function peminjaman(): BelongsTo {
         return $this->belongsTo(Peminjaman::class);
     }
 
-    protected function alat(): BelongsTo {
-        return $this->belongsTo(Alat::class);
+    public function alat(): BelongsTo {
+        return $this->belongsTo(Alat::class, 'alat_id');
     }
 }
