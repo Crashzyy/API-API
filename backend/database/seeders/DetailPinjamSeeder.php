@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\DetilPinjam;
+use App\Models\DetailPinjam;
 use Illuminate\Database\Seeder;
 
 class DetailPinjamSeeder extends Seeder

@@ -12,13 +12,13 @@ class PeminjamController extends Controller
 {
     //Melihat daftar/katalog alat yang tersedia
     public function katalogAlat() {
-        $alats = Alat::with('kategori')-where('stok', '>', 0)->get();
+        $alats = Alat::with('kategori')->where('stok', '>', 0)->get();
         return view('peminjam.katalog', compact('alats'));
     }
 
     public function ajukanPeminjaman(Request $request) {
         $request->validate([
-            'tgl_kembali_plan' => 'required|date\after:today',
+            'tgl_kembali_plan' => 'required|date|after:today',
             'alat_id' => 'required|array',
             'jumlah' => 'required|array',
 

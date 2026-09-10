@@ -22,6 +22,16 @@ class PetugasController extends Controller
             $peminjaman = Peminjaman::with('detailPinjams')->findOrFail($id);
             $peminjaman->update(['status' => 'dipinjam']);
 
+            //Memastikan stok alat cukup sebelum mengurangi stok
+            if ($alat->stok < $detail->jumlah) {
+                throw new \Exception("Stok alat {$alat->nama_alat} tidak cukup untuk peminjaman.");
+            }
+
+            //Cegah stok dikurangi dua kali
+            if ($peminjaman->status !== 'diajukan'){
+                return back()->with('error', 'Peminjaman sudah diproses.');
+            }
+
             //kurangi stok alat secara otomatis
             foreach ($peminjaman->detailPinjams as $detail) {
                 $alat = Alat::findOrFail($detail->alat_id);
@@ -33,7 +43,7 @@ class PetugasController extends Controller
             return redirect()->back()->with('success', 'Peminjaman disetujui dan stok alat dikurangi.');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi kesalahan' . $e->getMassage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan' . $e->getMessage());
         }
     }
     public function prosesPengembalian (Request $request, $peminjamanId) {
@@ -70,7 +80,7 @@ class PetugasController extends Controller
             return redirect()->back()->with('success', 'Pengembalian berhasil dicatat dan stok dipulihkanl.');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Terjadi Kesalahan' . $e->getMassage());
+            return redirect()->back()->with('error', 'Terjadi Kesalahan' . $e->getMessage());
         }
     }
 }

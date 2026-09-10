@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alat;
+use App\models\Peminjaman;
+use App\Models\DetailPinjam;
 use App\Models\Kategori;
 use App\Models\User;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 
 class AdminController extends Controller
@@ -18,7 +22,7 @@ class AdminController extends Controller
     }
 
     //CRUD user (Manajemen User Admin, Petugas, Peminjaman)
-    public function indexUser() {
+    public function indexUser(Request $request) {
         $search = $request->input('search');
 
         $users = User::when($search, function($query, $search) {
@@ -117,9 +121,9 @@ class AdminController extends Controller
         }
 
         //Menyimpan Kategori baru
-        public function storeKategori() {
+        public function storeKategori(Request $request) {
             $request->validate([
-                'nama_kategori' => 'required|string|max:255|unique:kategoris,nama_kategori',
+                'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori',
             ]);
 
             Kategori::create([
@@ -132,7 +136,7 @@ class AdminController extends Controller
         //Menampilkan form edit kategori
         public function editKategori($id) {
             $kategori = Kategori::findOrFail($id);
-            return view('admin.kategori.edit', compact('kategori'));
+            return view('admin.kategori.edit', compact('kategoris'));
         }
 
         //Memperbarui kategori
@@ -140,7 +144,7 @@ class AdminController extends Controller
             $kategori = Kategori::findOrFail($id);
 
             $request->validate([
-                'nama_kategori' => 'required|string|max:255|unique:kategoris,nama_kategori,' . $id,
+                'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori,' . $id,
             ]);
 
             $kategori->update([
@@ -155,7 +159,7 @@ class AdminController extends Controller
             $kategori = Kategori::findOrFail($id);
 
             //Opsional: Mengcheck apakah kategori masih dipakai oleh alat
-            if ($kategori->$alats()->count() > 0) {
+            if ($kategori->$alat()->exists()) {
                 return redirect()->route('admin.kategori.index')
                 ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh data alat');
             }
@@ -193,7 +197,7 @@ class AdminController extends Controller
     public function storeAlat(Request $request) {
         $request->validate([
             'nama_alat' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategoris,id',
+            'kategori_id' => 'required|exists:kategori,id',
             'stok'=> 'required|integer|min:8',
             'status_kondisi'=> 'required|string|max:100',
             'deskripsi' => 'nullable|string',
@@ -218,7 +222,7 @@ class AdminController extends Controller
     public function editAlat($id) {
         $alat = Alat::findOrFail($id);
         $kategoris = Kategori::all();
-        return view('admin.alat.edit', compact('alat', 'kategoris'));
+        return view('admin.alat.edit', compact('alats', 'kategori'));
     }
 
     //Memperbarui data alat
@@ -227,7 +231,7 @@ class AdminController extends Controller
 
         $request->validate([
             'nama_alat' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategoris,id',
+            'kategori_id' => 'required|exists:kategori,id',
             'stok'=> 'required|integer|min:8',
             'status_kondisi'=> 'required|string|max:100',
             'deskripsi' => 'nullable|string',
@@ -297,9 +301,9 @@ class AdminController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'tgl_pinjam' => 'required|date',
-            'tgl_kembali_plan' => 'required|date|after_or_equal:tanggal_pinjam',
+            'tgl_kembali_plan' => 'required|date|after_or_equal:tgl_pinjam',
             'alat_id' => 'required|array',
-            'alat_id.*' => 'exists:alats,id',
+            'alat_id.*' => 'exists:alat,id',
             'jumlah'=> 'required|array',
             'jumlah.*' => 'integer|min:1',
         ]);
@@ -371,7 +375,7 @@ class AdminController extends Controller
                 }
             }
 
-            peminjaman->update(['status' => $statusBaru]);
+            $peminjaman->update(['status' => $statusBaru]);
             DB::commit();
             return redirect()->route('admin.peminjaman.index')->with('success', 'Status peminjaman berhasil diperbarui.');
         } catch (\Exception $e) {

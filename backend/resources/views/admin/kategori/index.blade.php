@@ -59,7 +59,7 @@
                             <td class="py-3 px-4 border-b font-medium text-gray-900">{{ $kategori->nama_kategori }}</td>
                             <td class="py-3 px-4 border-b">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{'route(admin.kategori.edit', $kategori->id) }}"
+                                    <a href="{{ route('admin.kategori.edit', $kategori->id) }}"
                                     class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-semibold transition">
                                         Edit
                                     </a>

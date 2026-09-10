@@ -15,10 +15,6 @@ Route::get('/', function () {
 Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-    //CRUD Alat
-    Route::get('alat', [AdminController::class, 'indexAlat'])->name('alat.index');
-    Route::post('/alat', [AdminController::class, 'storeAlat'])->name('alat.store');
-
     //CRUD User
     Route::get('/users', [AdminController::class, 'indexUser'])->name('user.index');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('user.create');
@@ -32,7 +28,7 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     Route::get('/kategori/create', [AdminController::class,'createKategori'])->name('kategori.create');
     Route::post('/kategori', [AdminController::class,'storeKategori'])->name('kategori.store');
     Route::get('/kategori/{id}/edit', [AdminController::class,'editKategori'])->name('kategori.edit');
-    Route::put('/kategori/{id}', [AdminController::class,''])->name('kategori.update');
+    Route::put('/kategori/{id}', [AdminController::class,'updateKategori'])->name('kategori.update');
     Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('kategori.destroy');
 
     //CRUD Alat
@@ -46,8 +42,8 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     //CRUD Peminjaman
     Route::get('/peminjaman', [AdminController::class,'indexPeminjaman'])->name('peminjaman.index');
     Route::get('/peminjaman/create', [AdminController::class,'createPeminjaman'])->name('peminjaman.create');
-    Route::get('/peminjaman', [AdminController::class,'storePeminjaman'])->name('peminjaman.store');
-    Route::put('/peminjaman/{id}/status', [AdminController::class,'updateStatusPeminjaman'])->name('peminjaman.updateStatus');
+    Route::post('/peminjaman', [AdminController::class,'storePeminjaman'])->name('peminjaman.store');
+    Route::put('/peminjaman/{id}/status', [AdminController::class,'updatePeminjamanStatus'])->name('peminjaman.updateStatus');
     Route::delete('/peminjaman/{id}', [AdminController::class,'destroyPeminjaman'])->name('peminjaman.destroy');
 });
 

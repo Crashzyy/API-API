@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DetilPinjam extends Model
+class DetailPinjam extends Model
 {
     protected $table = 'detail_pinjam';
 

@@ -14,13 +14,13 @@ class PeminjamanSeeder extends Seeder
                 'user_id' => 3, // Rizal
                 'tgl_pinjam' => '2026-06-02',
                 'tgl_kembali_plan' => '2026-06-04',
-                'status' => 'dikembalikan',
+                'status' => 'selesai',
             ],
             [
                 'user_id' => 4, // Rian
                 'tgl_pinjam' => '2026-06-03',
                 'tgl_kembali_plan' => '2026-06-05',
-                'status' => 'dikembalikan',
+                'status' => 'selesai',
             ],
             [
                 'user_id' => 5, // Eka
