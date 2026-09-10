@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\PetugasControlller;
-use App\Http\Controlllers\PeminjamController;
+use App\Http\Controllers\PetugasController;
+use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
@@ -33,6 +34,21 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     Route::get('/kategori/{id}/edit', [AdminController::class,'editKategori'])->name('kategori.edit');
     Route::put('/kategori/{id}', [AdminController::class,''])->name('kategori.update');
     Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('kategori.destroy');
+
+    //CRUD Alat
+    Route::get('/alat', [AdminController::class,'indexAlat'])->name('alat.index');
+    Route::get('/alat/create', [AdminController::class,'createAlat'])->name('alat.create');
+    Route::post('/alat', [AdminController::class,'storeAlat'])->name('alat.store');
+    Route::get('/alat/{id}/edit', [AdminController::class,'editAlat'])->name('alat.edit');
+    Route::put('/alat/{id}', [AdminController::class,'updateAlat'])->name('alat.update');
+    Route::delete('/alat/{id}', [AdminController::class,'destroyAlat'])->name('alat.destroy');
+
+    //CRUD Peminjaman
+    Route::get('/peminjaman', [AdminController::class,'indexPeminjaman'])->name('peminjaman.index');
+    Route::get('/peminjaman/create', [AdminController::class,'createPeminjaman'])->name('peminjaman.create');
+    Route::get('/peminjaman', [AdminController::class,'storePeminjaman'])->name('peminjaman.store');
+    Route::put('/peminjaman/{id}/status', [AdminController::class,'updateStatusPeminjaman'])->name('peminjaman.updateStatus');
+    Route::delete('/peminjaman/{id}', [AdminController::class,'destroyPeminjaman'])->name('peminjaman.destroy');
 });
 
 //petugas
