@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistem Peminjaman Alat')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-100 text-gray-800">
     <div class="flex min-h-screen">
-        <aside class="hidden w-64 shrink-0 bg-gray-800 text-gray-300 md:flex md:flex-col">
+        <aside id="sidebar" class="hidden w-64 shrink-0 overflow-hidden bg-gray-800 text-gray-300 transition-all duration-300 ease-in-out md:flex md:flex-col">
             <div class="border-b border-gray-700 px-6 py-6">
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Sistem</p>
                 <h1 class="mt-1 text-xl font-bold text-white">Peminjaman Alat</h1>
@@ -49,9 +57,14 @@
         <div class="min-w-0 flex-1">
             <header class="border-b border-gray-200 bg-white">
                 <div class="flex min-h-20 items-center justify-between px-5 py-4 sm:px-8">
-                    <div>
-                        <p class="text-sm text-gray-500">Panel Administrasi</p>
-                        <h2 class="text-xl font-bold text-gray-900">@yield('header-title', 'Dashboard')</h2>
+                    <div class="flex items-center gap-3">
+                        <button id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="true" title="Sembunyikan sidebar" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-lg leading-none text-gray-700 transition hover:bg-gray-100">
+                            ☰
+                        </button>
+                        <div>
+                            <p class="text-sm text-gray-500">Panel Administrasi</p>
+                            <h2 class="text-xl font-bold text-gray-900">@yield('header-title', 'Dashboard')</h2>
+                        </div>
                     </div>
                     <div class="hidden text-right sm:block">
                         <p class="text-sm font-semibold text-gray-800">{{ auth()->user()->name }}</p>
@@ -65,5 +78,38 @@
             </main>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebar-toggle');
+            let sidebarVisible = window.matchMedia('(min-width: 768px)').matches;
+
+            toggle.setAttribute('aria-expanded', String(sidebarVisible));
+            toggle.setAttribute('title', sidebarVisible ? 'Sembunyikan sidebar' : 'Tampilkan sidebar');
+
+            toggle.addEventListener('click', function () {
+                sidebarVisible = !sidebarVisible;
+
+                if (sidebarVisible) {
+                    sidebar.classList.remove('w-0', 'opacity-0', 'pointer-events-none');
+                    sidebar.classList.add('w-64');
+                    sidebar.style.display = 'flex';
+                } else {
+                    sidebar.classList.remove('w-64');
+                    sidebar.classList.add('w-0', 'opacity-0', 'pointer-events-none');
+
+                    if (!window.matchMedia('(min-width: 768px)').matches) {
+                        setTimeout(function () {
+                            if (!sidebarVisible) sidebar.style.display = 'none';
+                        }, 300);
+                    }
+                }
+
+                toggle.setAttribute('aria-expanded', String(sidebarVisible));
+                toggle.setAttribute('title', sidebarVisible ? 'Sembunyikan sidebar' : 'Tampilkan sidebar');
+            });
+        });
+    </script>
 </body>
 </html>

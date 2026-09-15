@@ -198,7 +198,7 @@ class AdminController extends Controller
         $request->validate([
             'nama_alat' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategori,id',
-            'stok'=> 'required|integer|min:8',
+            'stok'=> 'required|integer|min:1',
             'status_kondisi'=> 'required|string|max:100',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -222,7 +222,7 @@ class AdminController extends Controller
     public function editAlat($id) {
         $alat = Alat::findOrFail($id);
         $kategoris = Kategori::all();
-        return view('admin.alat.edit', compact('alat', 'kategori'));
+        return view('admin.alat.edit', compact('alat', 'kategoris'));
     }
 
     //Memperbarui data alat
@@ -232,7 +232,7 @@ class AdminController extends Controller
         $request->validate([
             'nama_alat' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategori,id',
-            'stok'=> 'required|integer|min:8',
+            'stok'=> 'required|integer|min:1',
             'status_kondisi'=> 'required|string|max:100',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
