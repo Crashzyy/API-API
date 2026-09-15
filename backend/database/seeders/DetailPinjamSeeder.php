@@ -18,7 +18,7 @@ class DetailPinjamSeeder extends Seeder
         ];
 
         foreach ($details as $detail) {
-            DetilPinjam::create($detail);
+            DetailPinjam::create($detail);
         }
     }
 }

@@ -1,41 +1,44 @@
-services: 
-  #Database
+services:
+ # 1. SERVER DATABASE
   mysql-server:
     image: mysql:8.0-debian
-    container_name: MySQL_Alat
+    container_name: Alat_API-DB
+    restart: always
     environment:
-      MYSQL_DATABASE: Alat_api
+      MYSQL_DATABASE: Alat_API
       MYSQL_USER: alat_api
       MYSQL_PASSWORD: alat_api
-      MYSQL_ROOT_PASSWORD: paswordroot
-    ports:                                                                                                                                         
+      MYSQL_ROOT_PASSWORD: passwordroot
+    ports:
       - "3306:3306"
     networks:
-      - ALAT_API
+      - Peminjaman-Alat
     volumes:
       - db_data:/var/lib/mysql
 
-  # Backend Laravel
+  # 2 SERVER BACKEND (LARAVEL)
   app-laravel:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: alat_app
+    container_name: Alat_app
+    user: "1000:1000"
     working_dir: /var/www
-    ports: 
-      - "8000:8000"
+    ports:
+      - "8080:8000"
     volumes:
       - ./backend:/var/www
     command: php artisan serve --host=0.0.0.0 --port=8000
-    depends_on: 
-      - mysql-server 
-    networks: 
-      - ALAT_API
+    depends_on:
+      - mysql-server
+    networks:
+      - Peminjaman-Alat
 
-  # UI Server Database 
-  phppMyadmin:
+  # 3. SERVER UI DATABASE (PHPMYADMIN)
+  phpMyadmin:
     image: phpmyadmin
-    container_name: PhpMyadmin-alat
+    container_name: phpMyadmin-Alat
+    restart: always
     environment:
       PMA_HOST: mysql-server
     ports:
@@ -43,10 +46,10 @@ services:
     depends_on:
       - mysql-server
     networks:
-      - ALAT_API
+      - Peminjaman-Alat
 
 volumes:
   db_data:
 networks:
-  ALAT_API:
+  Peminjaman-Alat:
     driver: bridge
