@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alat;
 use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\DetailPinjam;
 use App\Models\Kategori;
 use App\Models\User;
@@ -286,6 +287,19 @@ class AdminController extends Controller
             ->withQueryString();
 
         return view('admin.peminjaman.index', compact('peminjamans'));
+    }
+
+    // Menampilkan riwayat pengembalian alat
+    public function indexPengembalian() {
+        $pengembalians = Pengembalian::with([
+            'peminjaman.user',
+            'peminjaman.detailPinjams.alat',
+            'petugas',
+        ])
+            ->latest('tgl_kembali')
+            ->paginate(10);
+
+        return view('admin.pengembalian.index', compact('pengembalians'));
     }
 
     //Menampilkan form tambah peminjaman

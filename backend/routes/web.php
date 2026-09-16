@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LaporanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,12 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     Route::post('/peminjaman', [AdminController::class,'storePeminjaman'])->name('peminjaman.store');
     Route::put('/peminjaman/{id}/status', [AdminController::class,'updatePeminjamanStatus'])->name('peminjaman.updateStatus');
     Route::delete('/peminjaman/{id}', [AdminController::class,'destroyPeminjaman'])->name('peminjaman.destroy');
+
+    // Riwayat Pengembalian
+    Route::get('/pengembalian', [AdminController::class, 'indexPengembalian'])->name('pengembalian.index');
+
+    // Laporan
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
 });
 
 //petugas
@@ -52,9 +59,11 @@ Route::middleware(['auth','role:petugas,admin'])->prefix('petugas')->name('petug
     //Peminjaman & Persetujuan
     Route::get('/peminjaman', [PetugasController::class, 'indexPeminjaman'])->name('peminjaman.index');
     Route::post('/peminjaman/{id}/setujui', [PetugasController::class,'setujuiPeminjaman'])->name('peminjaman.setujui');
+    Route::post('/peminjaman/{id}/tolak', [PetugasController::class,'tolakPeminjaman'])->name('peminjaman.tolak');
 
     //Pengembalian & Denda
     Route::post('/pengembalian/{id}', [PetugasController::class, 'prosesPengembalian'])->name('pengembalian.proses');
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
 });
 
 //Peminjam
