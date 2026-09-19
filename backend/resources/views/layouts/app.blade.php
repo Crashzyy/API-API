@@ -25,6 +25,7 @@
             width: 16rem;
             transform: translateX(-100%);
             transition: transform 300ms ease-in-out;
+            overscroll-behavior: contain;
         }
 
         .sidebar-shell.is-open .sidebar-panel {
@@ -35,7 +36,8 @@
             .sidebar-shell { width: 16rem; }
             .sidebar-shell:not(.is-open) { width: 0; }
             .sidebar-panel {
-                position: relative;
+                position: sticky;
+                top: 0;
                 height: 100vh;
                 transform: translateX(0);
             }
@@ -45,22 +47,24 @@
         }
 
         @media print {
-            .no-print { display: none !important; }
+            html, body { min-height: 0 !important; height: auto !important; overflow: visible !important; }
+            .no-print, #sidebar-shell, #sidebar-backdrop, header, .sidebar-panel { display: none !important; }
             body { background: white !important; }
-            main { max-width: none !important; padding: 0 !important; }
+            body > div.flex { display: block !important; min-height: 0 !important; }
+            main { width: 100% !important; max-width: none !important; padding: 0 !important; }
         }
     </style>
 </head>
 <body class="min-h-screen bg-gray-100 text-gray-800">
     <div class="flex min-h-screen">
     <div id="sidebar-shell" class="sidebar-shell is-open no-print">
-            <aside id="sidebar" class="sidebar-panel no-print flex flex-col overflow-y-auto bg-gray-800 text-gray-300 shadow-xl">
+            <aside id="sidebar" class="sidebar-panel no-print flex flex-col overflow-hidden bg-gray-800 text-gray-300 shadow-xl">
                 <div class="border-b border-gray-700 px-6 py-6">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Sistem</p>
                     <h1 class="mt-1 text-xl font-bold text-white">Peminjaman Alat</h1>
                 </div>
 
-                <nav class="flex-1 space-y-1 px-3 py-6">
+                <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-6">
                     <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">Menu Utama</p>
 
                     @if(auth()->user()->role === 'admin')
@@ -102,15 +106,49 @@
                     @endif
                 </nav>
 
-                <div class="border-t border-gray-700 p-4">
-                    <div class="mb-3 rounded-lg bg-gray-700 px-3 py-3">
-                        <p class="truncate text-sm font-semibold text-white">{{ auth()->user()->name }}</p>
-                        <p class="mt-1 text-xs uppercase tracking-wide text-gray-300">{{ auth()->user()->role }}</p>
+                <div class="shrink-0 border-t border-gray-700 p-4">
+                    <div class="relative mb-3">
+                        <button id="profile-toggle" type="button" aria-controls="profile-menu" aria-expanded="false" class="flex w-full items-center gap-3 rounded-lg bg-gray-700 px-3 py-3 text-left transition hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                            @if(auth()->user()->foto_profile)
+                                <img src="{{ asset(auth()->user()->foto_profile) }}" alt="Foto {{ auth()->user()->name }}" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                            @else
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-500 text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                            @endif
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-semibold text-white">{{ auth()->user()->name }}</span>
+                                <span class="mt-1 block text-xs uppercase tracking-wide text-gray-300">{{ auth()->user()->role }}</span>
+                            </span>
+                            <span class="text-xs text-gray-300">▴</span>
+                        </button>
+
+                        <div id="profile-menu" class="absolute bottom-full left-0 z-50 mb-2 hidden max-h-[calc(100vh-1rem)] w-full max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-4 text-gray-800 shadow-xl">
+                            <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                                @if(auth()->user()->foto_profile)
+                                    <img src="{{ asset(auth()->user()->foto_profile) }}" alt="Foto {{ auth()->user()->name }}" class="h-14 w-14 shrink-0 rounded-full object-cover">
+                                @else
+                                    <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-700 text-xl font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                @endif
+                                <div class="min-w-0">
+                                    <p class="truncate font-semibold text-gray-900">{{ auth()->user()->name }}</p>
+                                    <p class="truncate text-sm text-gray-500">{{ auth()->user()->email }}</p>
+                                    <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ auth()->user()->role }}</p>
+                                </div>
+                            </div>
+
+                            <form action="{{ route('profile.photo.update') }}" method="POST" enctype="multipart/form-data" class="pt-4">
+                                @csrf
+                                <label for="foto_profile" class="mb-2 block text-sm font-semibold text-gray-700">Ganti foto profil</label>
+                                <input id="foto_profile" name="foto_profile" type="file" accept="image/jpeg,image/png,image/webp" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-xs text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-700 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-gray-600">
+                                <p class="mt-1 text-xs text-gray-500">JPG, PNG, atau WEBP. Maksimal 2 MB.</p>
+                                <button type="submit" class="mt-3 w-full rounded-lg bg-gray-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-gray-600">Simpan Foto</button>
+                            </form>
+
+                            <form action="{{ route('logout') }}" method="POST" class="mt-4 border-t border-gray-200 pt-3">
+                                @csrf
+                                <button type="submit" class="w-full rounded-lg bg-red-50 px-3 py-2 text-left text-sm font-semibold text-red-600 transition hover:bg-red-100">Keluar</button>
+                            </form>
+                        </div>
                     </div>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full rounded-lg border border-gray-600 bg-gray-600 px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-gray-500">Keluar</button>
-                    </form>
                 </div>
             </aside>
         </div>
@@ -129,9 +167,16 @@
                             <h2 class="truncate text-lg font-bold text-gray-900 sm:text-xl">@yield('header-title', 'Dashboard')</h2>
                         </div>
                     </div>
-                    <div class="hidden text-right sm:block">
-                        <p class="text-sm font-semibold text-gray-800">{{ auth()->user()->name }}</p>
-                        <p class="text-xs capitalize text-gray-500">{{ auth()->user()->role }}</p>
+                    <div class="flex items-center gap-2">
+                        @if(auth()->user()->foto_profile)
+                            <img src="{{ asset(auth()->user()->foto_profile) }}" alt="Foto {{ auth()->user()->name }}" class="h-9 w-9 rounded-full object-cover">
+                        @else
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        @endif
+                        <div class="hidden text-right sm:block">
+                            <p class="text-sm font-semibold text-gray-800">{{ auth()->user()->name }}</p>
+                            <p class="text-xs capitalize text-gray-500">{{ auth()->user()->role }}</p>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -147,6 +192,8 @@
             const shell = document.getElementById('sidebar-shell');
             const toggle = document.getElementById('sidebar-toggle');
             const backdrop = document.getElementById('sidebar-backdrop');
+            const profileToggle = document.getElementById('profile-toggle');
+            const profileMenu = document.getElementById('profile-menu');
 
             function isDesktop() {
                 return window.matchMedia('(min-width: 768px)').matches;
@@ -171,6 +218,22 @@
 
             window.addEventListener('resize', function () {
                 setSidebar(isDesktop());
+            });
+
+            profileToggle.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = !profileMenu.classList.contains('hidden');
+                profileMenu.classList.toggle('hidden', isOpen);
+                profileToggle.setAttribute('aria-expanded', String(!isOpen));
+            });
+
+            profileMenu.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
+            document.addEventListener('click', function () {
+                profileMenu.classList.add('hidden');
+                profileToggle.setAttribute('aria-expanded', 'false');
             });
         });
     </script>

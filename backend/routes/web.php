@@ -7,6 +7,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,6 +53,8 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
 
     // Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/excel', [LaporanController::class, 'excel'])->name('laporan.excel');
+    Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])->name('laporan.pdf');
 });
 
 //petugas
@@ -64,6 +67,8 @@ Route::middleware(['auth','role:petugas,admin'])->prefix('petugas')->name('petug
     //Pengembalian & Denda
     Route::post('/pengembalian/{id}', [PetugasController::class, 'prosesPengembalian'])->name('pengembalian.proses');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/excel', [LaporanController::class, 'excel'])->name('laporan.excel');
+    Route::get('/laporan/pdf', [LaporanController::class, 'pdf'])->name('laporan.pdf');
 });
 
 //Peminjam
@@ -82,3 +87,8 @@ Route::middleware('guest')->group(function() {
 
 //Route Logout
 Route::post('/logout', [AuthController::class,'logout'])->name('logout')->middleware('auth');
+
+// Profil akun
+Route::middleware('auth')->group(function () {
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
+});

@@ -31,7 +31,10 @@
                     </div>
                 </form>
 
-                <button type="button" onclick="window.print()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">Cetak Laporan</button>
+                <div class="flex flex-wrap items-end gap-2">
+                    <a href="{{ route(request()->routeIs('admin.laporan.*') ? 'admin.laporan.excel' : 'petugas.laporan.excel', request()->query()) }}" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700">Excel</a>
+                    <a href="{{ route(request()->routeIs('admin.laporan.*') ? 'admin.laporan.pdf' : 'petugas.laporan.pdf', request()->query()) }}" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700">PDF</a>
+                </div>
             </div>
         </div>
 
